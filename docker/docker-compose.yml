@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  eballs:
+    build: .
+    restart: always
+    environment:
+      MONGO_DB: eballs
+      MONGO_USERNAME_FILE: /run/secrets/mongo_login
+      MONGO_PASSWORD_FILE: /run/secrets/mongo_password
+      MONGO_INITDB_DATABASE: eballs
+      TOKEN_FILE: /run/secrets/token
+      ADMIN: /run/secrets/admin_id
+    secrets:
+      - token
+      - mongo_password
+    depends_on:
+      - wait-dependencies
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongo_admin_login
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_admin_password
+      MONGO_USERNAME_FILE: /run/secrets/mongo_login
+      MONGO_PASSWORD_FILE: /run/secrets/mongo_password
+      MONGO_INITDB_DATABASE: eballs
+    secrets:
+      - mongo_admin_password
+      - mongo_password
+    volumes:
+      - dbdata:/data/db
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+  wait-dependencies:
+    image: willwill/wait-for-it:latest
+    depends_on:
+      - mongo
+    entrypoint: /bin/sh
+    command: >
+			-c "./wait-for-it.sh mongo:27017 --strict --timeout=1"
+
+secrets:
+  mongo_admin_password:
+    file: .secrets/mongo_admin_password.txt
+  mongo_password:
+    file: .secrets/mongo_password.txt
+  token:
+    file: .secrets/token.txt
+volumes:
+  dbdata:
