@@ -11,8 +11,7 @@
       "@commands/*": ["commands/*"],
       "@helpers/*": ["helpers/*"],
       "@middlewares/*": ["middlewares/*"],
-      "@models/*": ["models/*"],
-      "@utils/*": ["utils/*"]
+      "@models/*": ["models/*"]
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
